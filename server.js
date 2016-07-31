@@ -37,28 +37,29 @@ app.get('/scrapeit', function(req, res){
 	//request('http://www.howtogeek.com/howto/23319/beginner-geek-do-more-with-windows-7-sticky-notes/', function(err, response, html){
 	request('http://customwire.ap.org/dynamic/fronts/HOME?SITE=AP&SECTION=HOME', function(err, response, html){
 	
-		console.log(html);
-
 		var $ = cheerio.load(html);
 
 		$('.ap-newsbriefitem').each(function(i, element){
+
+			//grabs and assembles the url to the article
 			var link = $(this).find('a.ap-newsbriefitem-a').attr('href');
 			var firstOfLink = 'http://customwire.ap.org';
 			var link = firstOfLink + link;
 
+			// grabs the headline of the article
 			var title = $(this).find('span.topheadline').text();
 
-			var blurb = $(this).find().text();
+			//grabs the brief body of the article
+			var blurb = $(this).find('span.topheadlinebody').text();
 
-			console.log("blurb is ", blurb);
 
-			/*db.scraped.find({"paragraph": text}, function(err, results){
+			db.scraped.find({"headline": title}, function(err, results){
 
 				if (err) throw err;
 
 				if(results == ""){
 
-					db.scraped.insert({"paragraph": text}, function(err, document){
+					db.scraped.insert({"headline": title, "articleURL": link, "blurb": blurb}, function(err, document){
 
 						if (err) throw err;
 
@@ -73,7 +74,7 @@ app.get('/scrapeit', function(req, res){
 					console.log("dup document");
 				}
 
-			});*/
+			});
 
 
 		});
