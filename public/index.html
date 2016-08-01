@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	
+	<style type="text/css">
+
+		body{
+			background-color: #702632;
+		}
+
+		h1{
+			text-align: center;
+			color: #FFF;
+		}
+		
+		#news {
+			padding: 5px 15px;
+		}
+
+		.headline{
+			font-weight: bold;
+			font-family: 'Tahoma';
+			color: #080705;
+		}
+
+		.blurb{
+			margin-bottom: 20px;
+		}
+
+		a {
+			text-decoration: none;
+		}
+		.comments {
+			border: 1px solid #FFF;
+			/*width: 65%;
+			margin: 5px auto;
+			height: 100px;
+			background-color: #40434E;*/
+		}
+
+		textarea{
+			border: 1px solid #FFF;
+			/*width: 65%;*/
+			width: 550px;
+			margin-left: 10px;
+			height: 100px;
+			background-color: #40434E;
+			color: #FFF;
+			font-size: 17px;
+		}
+
+		.textAreaContainer{
+			/*margin: 5px 0 0 10%;*/
+			border: 1px solid #000;
+			/*width: 50%;*/
+		}
+
+		input[type=submit]{
+			/*margin-left: 50px;*/
+			float: right;
+			margin-top: 50px;
+			margin-right: 30%;
+		}
+	</style>
+</head>
+<body>
+
+<h1>Associated Press News Outlet</h1>
+
+
+<div id="news"></div>
+
+<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+<script type="text/javascript">
+
+	var commentBox;
+	var commentBoxId;
+	var objID;
+
+	$('body').on('click', 'input', function(){
+
+		commentBoxId = $(this).attr('id');
+		commentBox = $('.'+commentBoxId+'').val().trim();
+		objID = $(this).attr('data-id');
+
+
+		alert(commentBox);
+
+		$.ajax({
+			type: 'POST',
+			url: '/comments',
+			dataType: 'json',
+			data: {
+				comments: commentBox,
+				objID: objID
+			}
+		}).done(function(data){
+
+			console.log("data is ", data);
+
+		});
+	});
+
+	function getNews(){
+
+		$('#news').empty();
+		var newArticle;
+		var commentsSpace;
+
+		$.getJSON('/news', function(data){
+
+			for(var x = 0; x < data.length; x++){
+
+				newArticle = '<a href='+ data[x].articleURL +'><h3 class="headline">' + data[x].headline + '</h3></a><p class="link">' + data[x].articleURL + '</p><p class="blurb">' + data[x].blurb + '</p>';
+
+				commentsSpace = '<div class="comments" id="article'+ x + 'comments"></div>';
+
+				$('#news').append(newArticle);
+				$('#news').append(commentsSpace);
+				//$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'"></textarea><input type="submit" class="subComment" id="addComm' + x + '" value="submit"></p>');
+				$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'"></textarea><input type="submit" class="subComment" data-id="'+ data[x]._id +'" id="' + x + '" value="submit"></p>');
+
+
+			}
+			
+
+		});
+
+
+	}
+
+
+
+getNews();
+</script>
+</body>
+</html>

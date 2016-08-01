@@ -1,13 +1,22 @@
+
+//dependencies
 var express = require('express');
 var app = express();
-
-//declare the PORT
-var PORT = process.env.PORT || 3000;
-
+var bodyParser = require('body-parser');
 var request = require('request');
 var cheerio = require('cheerio');
 
 var mongojs = require('mongojs');
+
+//declare the PORT
+var PORT = process.env.PORT || 3000;
+
+
+app.use(bodyParser.urlencoded({
+	extended: false
+}));
+
+app.use(express.static('public'));
 
 
 //make connection to db and collection(s)
@@ -19,22 +28,34 @@ db.on('error', function(error){
 
 
 //html routes
-app.get('/news', function(req, res){
+app.get('/', function(req, res){
+	res.send(index.html);
+});
 
+
+app.get('/news', function(req, res) {
 	db.scraped.find({}, function(err, results){
 
 		if(err) throw err;
 
-		res.json(results);
-
+		res.send(results);
+		
 	});
+})
 
+app.post('/comments', function(req, res){
+
+	console.log(req.body.comments);
+
+	//db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {"comments": req.body.comments}, {$upsert: true}); 
+	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$set: {"comments": req.body.comments}}, {$upsert: false}); 
+
+	res.send({});
 
 });
 
 app.get('/scrapeit', function(req, res){
 
-	//request('http://www.howtogeek.com/howto/23319/beginner-geek-do-more-with-windows-7-sticky-notes/', function(err, response, html){
 	request('http://customwire.ap.org/dynamic/fronts/HOME?SITE=AP&SECTION=HOME', function(err, response, html){
 	
 		var $ = cheerio.load(html);
@@ -79,7 +100,7 @@ app.get('/scrapeit', function(req, res){
 
 		});
 
-	//res.send("Website Successfully Scraped.");
+	res.send("Website Successfully Scraped.");
 
 	});
 
@@ -88,6 +109,5 @@ app.get('/scrapeit', function(req, res){
 
 //listen on PORT
 app.listen(PORT, function(){
-
 	console.log('Listening on port 3000.');
 });
