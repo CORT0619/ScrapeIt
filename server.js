@@ -57,7 +57,7 @@ app.post('/comments', function(req, res){
 app.get('/showComments/:objID', function(req, res){
 	//db.scraped.find({_id: mongojs.ObjectId(req.body.objID)}, {"comments": 1}, function(err, results){
 
-		console.log("id is ", req.body.objID);
+		//console.log("id is ", req.body.objID);
 		console.log("id2 is ", req.params.objID);
 
 	db.scraped.find({_id: mongojs.ObjectId(req.params.objID)}, {"comments": 1}, function(err, results){	

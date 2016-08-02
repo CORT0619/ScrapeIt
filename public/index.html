@@ -152,16 +152,9 @@
 			$('.'+commentBoxId+'').val("");
 			$('#article'+ commentBoxId + 'comments').empty();
 
-			$.ajax({
-				type: 'GET',
-				url: '/showComments/' + objID
-				/*dataType: 'json', 
-				data: {
-					objID: id
-				}*/
-			}).done(function(data){
-				getComments(data, commentBoxId);
-			});
+			getComments(objID, commentBoxId);
+
+
 
 
 			//getComments();
@@ -185,7 +178,7 @@
 				$('#news').append(commentsSpace);
 
 				if(data[x].comments){
-					getComments(data, x);					
+					getComments(/*data, x*/data[x]._id, x);					
 				}
 
 
@@ -207,7 +200,7 @@
 
 	}
 
-	function getComments(data, x){
+	function getComments(/*data, x*/objID, commentBoxId){
 		//$.ajax(type: 'GET', url: '/showComments', {objID: id}, function(data){
 
 		/*$.get('/showComments', {objID: id}).done(function(data){
@@ -232,13 +225,26 @@
 		// 	//console.log(""data[0].name);
 			
 		// });
-		console.log("just data is ", data);
-		console.log("data[x] is ", data[x]);
 
-		for(var i=0; i < data[x].comments.length; i++){
+		$.ajax({
+			type: 'GET',
+			url: '/showComments/' + objID
+			/*dataType: 'json', 
+			data: {
+				objID: id
+			}*/
+		}).done(function(data){
+			//getComments(data, commentBoxId);
 
-			$('#article'+ x + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[x].comments[i].name + " - " + data[x].comments[i].date + "</p><p class='userComment'>" + data[x].comments[i].comment + "</p></div>");						
-		}	
+			console.log("just data is ", data);
+			console.log("data[x] is ", data[0]);
+
+			for(var i=0; i < data[0].comments.length; i++){
+
+				$('#article'+ commentBoxId + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[0].comments[i].name + " - " + data[0].comments[i].date + "</p><p class='userComment'>" + data[0].comments[i].comment + "</p></div>");						
+			}
+
+		});			
 	}
 
 
