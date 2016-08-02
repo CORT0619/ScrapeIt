@@ -45,13 +45,30 @@ app.get('/news', function(req, res) {
 
 app.post('/comments', function(req, res){
 
-	console.log(req.body.comments);
+	//console.log(req.body.comments);
 
 	//db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {"comments": req.body.comments}, {$upsert: true}); 
-	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$set: {"comments": req.body.comments}}, {$upsert: false}); 
+	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$push: {comments: {"name": req.body.name, "date": req.body.date, "comment": req.body.comments}}}, {$upsert: false}); 
 
 	res.send({});
 
+});
+
+app.get('/showComments/:objID', function(req, res){
+	//db.scraped.find({_id: mongojs.ObjectId(req.body.objID)}, {"comments": 1}, function(err, results){
+
+		console.log("id is ", req.body.objID);
+		console.log("id2 is ", req.params.objID);
+
+	db.scraped.find({_id: mongojs.ObjectId(req.params.objID)}, {"comments": 1}, function(err, results){	
+
+		if(err) throw err;
+
+		console.log("results are ", results);
+
+		res.send(results);
+		
+	});
 });
 
 app.get('/scrapeit', function(req, res){

@@ -31,14 +31,52 @@
 		a {
 			text-decoration: none;
 		}
-		.comments {
+		.commTitle{
+			background-color: #000;
+			color: #FFF;
+			margin-top: 0;
 			border: 1px solid #FFF;
-			/*width: 65%;
+			padding: 10px 10px;
+			font-weight: bold;
+		}
+		.indivComm{
+			border: 1px solid #000;
+			margin-bottom: 10px;
+			background-color: #40434E;
+			
+		}
+		.commHeader{
+			margin-top: 0px;
+			border: 1px solid #FFF;
+			padding: 6px 0px 6px 10px;
+			background-color: #702632;
+		}
+		.userComment{
+			padding: 5px 0px 0px 15px;
+		}
+		/*.comments {
+			border: 1px solid #FFF;
+			//border-radius: 2px;
+			width: 65%;
 			margin: 5px auto;
 			height: 100px;
-			background-color: #40434E;*/
-		}
+			background-color: #40434E;
 
+		}*/
+		.commContent{
+			padding: 0px 10px;
+			/*font-size: 16px;*/
+			color: #FFF;
+		}
+		input[type=text]{
+			font-size: 17px;
+			background-color: #40434E;
+			border-radius: 3px;
+			color: #FFF;
+			padding: 7px 7px;
+			border: 1px solid #FFF;
+			margin-left: 10px;
+		}
 		textarea{
 			border: 1px solid #FFF;
 			/*width: 65%;*/
@@ -48,8 +86,12 @@
 			background-color: #40434E;
 			color: #FFF;
 			font-size: 17px;
+			border-radius: 3px;
+			padding: 7px;
 		}
-
+		.nameContainer{
+			/*border: 1px solid #FFF;*/
+		}
 		.textAreaContainer{
 			/*margin: 5px 0 0 10%;*/
 			border: 1px solid #000;
@@ -76,16 +118,21 @@
 
 	var commentBox;
 	var commentBoxId;
+	var name;
 	var objID;
+
+	var newArticle;
+	var commentsSpace;
+
+	var date = new Date();
+	var created = date.toLocaleString();
 
 	$('body').on('click', 'input', function(){
 
 		commentBoxId = $(this).attr('id');
-		commentBox = $('.'+commentBoxId+'').val().trim();
+		name = $('#name' + commentBoxId).val().trim();		
+		commentBox = $('.'+commentBoxId).val().trim();
 		objID = $(this).attr('data-id');
-
-
-		alert(commentBox);
 
 		$.ajax({
 			type: 'POST',
@@ -93,20 +140,38 @@
 			dataType: 'json',
 			data: {
 				comments: commentBox,
-				objID: objID
+				objID: objID,
+				name: name,
+				date: created
+
 			}
 		}).done(function(data){
 
 			console.log("data is ", data);
+			$('#name' + commentBoxId+'').val("");		
+			$('.'+commentBoxId+'').val("");
+			$('#article'+ commentBoxId + 'comments').empty();
+
+			$.ajax({
+				type: 'GET',
+				url: '/showComments/' + objID
+				/*dataType: 'json', 
+				data: {
+					objID: id
+				}*/
+			}).done(function(data){
+				getComments(data, commentBoxId);
+			});
+
+
+			//getComments();
 
 		});
 	});
 
 	function getNews(){
 
-		$('#news').empty();
-		var newArticle;
-		var commentsSpace;
+		//$('#news').empty();
 
 		$.getJSON('/news', function(data){
 
@@ -114,12 +179,24 @@
 
 				newArticle = '<a href='+ data[x].articleURL +'><h3 class="headline">' + data[x].headline + '</h3></a><p class="link">' + data[x].articleURL + '</p><p class="blurb">' + data[x].blurb + '</p>';
 
-				commentsSpace = '<div class="comments" id="article'+ x + 'comments"></div>';
+				commentsSpace = '<div class="comments"><p class="commTitle">Comments</p><p class="commContent" id="article'+ x + 'comments"></p></div>';
 
 				$('#news').append(newArticle);
 				$('#news').append(commentsSpace);
-				//$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'"></textarea><input type="submit" class="subComment" id="addComm' + x + '" value="submit"></p>');
-				$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'"></textarea><input type="submit" class="subComment" data-id="'+ data[x]._id +'" id="' + x + '" value="submit"></p>');
+
+				if(data[x].comments){
+					getComments(data, x);					
+				}
+
+
+				// for(var i=0; i < data[x].comments.length; i++){
+
+				// 	$('#article'+ x + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[x].comments[i].name + " - " + data[x].comments[i].date + "</p><p class='userComment'>" + data[x].comments[i].comment + "</p></div>");						
+				// }	
+
+				$('#news').append('<p class="nameContainer"><input type="text" id="name' + x + '" placeholder="Name"></p>');
+
+				$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'" placeholder="Comments..."></textarea><input type="submit" class="subComment" data-id="'+ data[x]._id +'" id="' + x + '" value="submit"></p>');
 
 
 			}
@@ -128,6 +205,40 @@
 		});
 
 
+	}
+
+	function getComments(data, x){
+		//$.ajax(type: 'GET', url: '/showComments', {objID: id}, function(data){
+
+		/*$.get('/showComments', {objID: id}).done(function(data){
+
+			console.log("comments are ", data);
+			console.log(data[0]);
+			//console.log(""data[0].name);
+			
+		});*/
+
+		// $.ajax({
+		// 	type: 'GET',
+		// 	url: '/showComments/' + id,
+		// 	/*dataType: 'json', 
+		// 	data: {
+		// 		objID: id
+		// 	}*/
+		// }).done(function(data){
+
+		// 	console.log("comments are ", data);
+		// 	console.log(data[0]);
+		// 	//console.log(""data[0].name);
+			
+		// });
+		console.log("just data is ", data);
+		console.log("data[x] is ", data[x]);
+
+		for(var i=0; i < data[x].comments.length; i++){
+
+			$('#article'+ x + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[x].comments[i].name + " - " + data[x].comments[i].date + "</p><p class='userComment'>" + data[x].comments[i].comment + "</p></div>");						
+		}	
 	}
 
 
