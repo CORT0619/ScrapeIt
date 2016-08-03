@@ -43,28 +43,31 @@ app.get('/news', function(req, res) {
 	});
 })
 
+app.post('/delete', function(req, res){
+
+	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$pull: {comments: {name: req.body.name, date: req.body.date}}}, function(err){
+
+		if(err) throw err;
+
+		res.send({});
+	});
+
+
+});
+
 app.post('/comments', function(req, res){
 
-	//console.log(req.body.comments);
-
-	//db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {"comments": req.body.comments}, {$upsert: true}); 
 	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$push: {comments: {"name": req.body.name, "date": req.body.date, "comment": req.body.comments}}}, {$upsert: false}); 
 
 	res.send({});
 
 });
 
-app.get('/showComments/:objID', function(req, res){
-	//db.scraped.find({_id: mongojs.ObjectId(req.body.objID)}, {"comments": 1}, function(err, results){
+app.get('/showComments', function(req, res){
 
-		//console.log("id is ", req.body.objID);
-		console.log("id2 is ", req.params.objID);
-
-	db.scraped.find({_id: mongojs.ObjectId(req.params.objID)}, {"comments": 1}, function(err, results){	
+	db.scraped.find({_id: mongojs.ObjectId(req.query.objID)}, {"comments": 1}, function(err, results){	
 
 		if(err) throw err;
-
-		console.log("results are ", results);
 
 		res.send(results);
 		
