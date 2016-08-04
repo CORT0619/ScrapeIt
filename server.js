@@ -1,17 +1,29 @@
+
+//dependencies
 var express = require('express');
 var app = express();
-
-//declare the PORT
-var PORT = process.env.PORT || 3000;
-
+var bodyParser = require('body-parser');
 var request = require('request');
 var cheerio = require('cheerio');
 
 var mongojs = require('mongojs');
 
+//declare the PORT
+var PORT = process.env.PORT || 3000;
+
+
+app.use(bodyParser.urlencoded({
+	extended: false
+}));
+
+app.use(express.static('public'));
+
 
 //make connection to db and collection(s)
-var db = mongojs('scrapeit', ["scraped"]);
+	//var db = mongojs('scrapeit', ["scraped"]);
+var uri  = process.env.MONGODB_URI/* || 'mongodb://heroku_xwz9mmg1:hfh9fn7753olc67h9fopv5vfj8@ds145355.mlab.com:45355/heroku_xwz9mmg1';*/
+
+var db = mongojs(process.env.MONGODB_URI);
 db.on('error', function(error){
 
 	console.log("DB error: ", error);
@@ -19,22 +31,54 @@ db.on('error', function(error){
 
 
 //html routes
-app.get('/news', function(req, res){
+app.get('/', function(req, res){
+	res.send(index.html);
+});
 
+
+app.get('/news', function(req, res) {
 	db.scraped.find({}, function(err, results){
 
 		if(err) throw err;
 
-		res.json(results);
+		res.send(results);
+		
+	});
+})
 
+app.post('/delete', function(req, res){
+
+	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$pull: {comments: {name: req.body.name, date: req.body.date}}}, function(err){
+
+		if(err) throw err;
+
+		res.send({});
 	});
 
 
 });
 
+app.post('/comments', function(req, res){
+
+	db.scraped.update({_id: mongojs.ObjectId(req.body.objID)}, {$push: {comments: {"name": req.body.name, "date": req.body.date, "comment": req.body.comments}}}, {$upsert: false}); 
+
+	res.send({});
+
+});
+
+app.get('/showComments', function(req, res){
+
+	db.scraped.find({_id: mongojs.ObjectId(req.query.objID)}, {"comments": 1}, function(err, results){	
+
+		if(err) throw err;
+
+		res.send(results);
+		
+	});
+});
+
 app.get('/scrapeit', function(req, res){
 
-	//request('http://www.howtogeek.com/howto/23319/beginner-geek-do-more-with-windows-7-sticky-notes/', function(err, response, html){
 	request('http://customwire.ap.org/dynamic/fronts/HOME?SITE=AP&SECTION=HOME', function(err, response, html){
 	
 		var $ = cheerio.load(html);
@@ -79,7 +123,7 @@ app.get('/scrapeit', function(req, res){
 
 		});
 
-	//res.send("Website Successfully Scraped.");
+	res.send("Website Successfully Scraped.");
 
 	});
 
@@ -88,6 +132,5 @@ app.get('/scrapeit', function(req, res){
 
 //listen on PORT
 app.listen(PORT, function(){
-
 	console.log('Listening on port 3000.');
 });

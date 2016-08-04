@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ScrapeIt</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+	
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<style type="text/css">
+
+		body{
+			background-color: #702632;
+			font-size: 16px;
+		}
+
+		h1{
+			text-align: center;
+			color: #FFF;
+		}
+		
+		#news {
+			padding: 5px 15px;
+		}
+
+		.headline{
+			font-weight: bold;
+			font-family: 'Tahoma';
+			/*color: #080705;*/
+			color: #8c8c8c;
+		}
+
+		#link{
+			color: #000;			
+		}
+		.blurb{
+			margin-bottom: 20px;
+			color: #000;
+			font-weight: 500;
+		}
+
+		a {
+			text-decoration: none;
+		}
+		.commTitle{
+			background-color: #000;
+			color: #FFF;
+			margin-top: 0;
+			border: 1px solid #FFF;
+			padding: 10px 10px;
+			font-weight: bold;
+		}
+		.indivComm{
+			border: 1px solid #000;
+			margin-bottom: 10px;
+			background-color: #40434E;
+			
+		}
+		.indivComm:last-child{
+			margin-bottom: 35px
+		}
+		.commHeader{
+			margin-top: 0px;
+			border: 1px solid #FFF;
+			padding: 6px 0px 6px 10px;
+			background-color: #702632;
+		}
+		.userComment{
+			padding: 5px 0px 0px 15px;
+		}
+		/*.comments {
+			border: 1px solid #FFF;
+			//border-radius: 2px;
+			width: 65%;
+			margin: 5px auto;
+			height: 100px;
+			background-color: #40434E;
+
+		}*/
+		.commContent{
+			padding: 0px 10px;
+			/*font-size: 16px;*/
+			color: #FFF;
+		}
+		input[type=text]{
+			font-size: 17px;
+			background-color: #40434E;
+			border-radius: 3px;
+			color: #FFF;
+			padding: 7px 7px;
+			border: 1px solid #FFF;
+			margin-left: 10px;
+		}
+		textarea{
+			border: 1px solid #FFF;
+			/*width: 65%;*/
+			width: 550px;
+			margin-left: 10px;
+			height: 100px;
+			background-color: #40434E;
+			color: #FFF;
+			font-size: 17px;
+			border-radius: 3px;
+			padding: 7px;
+		}
+		.nameContainer{
+			/*border: 1px solid #FFF;*/
+		}
+		.textAreaContainer{
+			width: 15%;
+		}
+
+		input[type=submit]{
+			/*margin-left: 50px;*/
+			/*float: right;*/
+			vertical-align: top;
+			margin-top: 43px;
+			margin-left: 15px;
+		}
+		button{
+			float: right;
+			margin-right: 25px;
+			margin-bottom: 10px;
+		}
+		.clearfix{
+			overflow: auto;
+		}
+	</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="col-sm-12">
+<h1>Associated Press News Outlet</h1>
+
+
+<div id="news"></div>
+
+</div>
+</div>
+<script type="text/javascript">
+
+	var commentBoxId;
+	var name;
+	var commentBox;
+	var deleteId;
+	var objID;
+
+	var newArticle;
+	var commentsSpace;
+
+	var date = new Date();
+	var created = date.toLocaleString();
+
+	$('body').on('click', 'input', function(){
+
+		commentBoxId = $(this).attr('id');
+		objID = $(this).attr('data-id');
+
+		name = $('#name' + commentBoxId).val() == undefined ? '' : $('#name' + commentBoxId).val().trim();
+		commentBox = $('.'+commentBoxId).val() == undefined ? '' : $('.'+commentBoxId).val().trim();
+
+		$.ajax({
+			type: 'POST',
+			url: '/comments',
+			dataType: 'json',
+			data: {
+				comments: commentBox,
+				objID: objID,
+				name: name,
+				date: created
+
+			}
+		}).done(function(data){
+
+			$('#name' + commentBoxId+'').val("");		
+			$('.'+commentBoxId+'').val("");
+
+			$('#article'+ commentBoxId + 'comments').append("<div class='indivComm'><p class='commHeader'>" + name + " - " + created + "</p><p class='userComment'>" + commentBox + "<button id='delete" +commentBoxId + "'>Delete</button></div></p>");
+
+
+		});
+	});
+
+	$('body').on('click', 'button', function(){
+
+		deleteId = $(this).attr('id');
+
+		objID = $(this).attr('data-obj');
+
+		var articleID = deleteId.split("-");
+
+		var elm = $('p#article'+ articleID[0] + 'comments .indivComm:nth-child('+ articleID[1] + ')');
+
+		console.log("elem is", elm);
+
+		if($('p#article'+ articleID[0] + 'comments').children().length > 1){
+
+			var articleName = elm[0].childNodes[0].innerText;
+			var articleElm = articleName.split("-");
+			articleName = articleElm[0];
+			var articleDate = articleElm[1];
+			var articleComment = elm[0].childNodes[1].childNodes[0].data;
+
+		} else {
+
+			var articleName = elm[0].childNodes[0].innerText;
+			var articleElm = articleName.split("-");
+			articleName = articleElm[0];
+			var articleDate = articleElm[1];
+
+			var articleComment = elm[0].childNodes[1].childNodes[0].data;
+			//console.log($('p#article'+ articleID[0] + 'comments > indivComm' ).text());
+		}
+
+		$.ajax({
+			type: 'POST',
+			url: '/delete',
+			dataType: 'json',
+			data: {
+				name: articleName,
+				objID: objID,
+				comments: articleComment,
+				date: articleDate
+			} 
+		}).done(function(data){
+
+			console.log("complete");
+			$(elm).remove();
+
+
+		});
+	});
+
+	function getNews(){
+
+		$.getJSON('/news', function(data){
+
+			for(var x = 0; x < data.length; x++){
+
+				newArticle = '<a href='+ data[x].articleURL +'><h3 class="headline">' + data[x].headline + '</h3></a><p class="link">' + data[x].articleURL + '</p><p class="blurb">' + data[x].blurb + '</p>';
+
+				commentsSpace = '<div class="comments"><p class="commTitle">Comments</p><p class="commContent" id="article'+ x + 'comments"></p></div>';
+
+				$('#news').append(newArticle);
+				$('#news').append(commentsSpace);
+
+				if(data[x].comments){
+					getComments(/*data, x*/data[x]._id, x);					
+				}
+
+
+				$('#news').append('<p class="nameContainer"><input type="text" id="name' + x + '" placeholder="Name"></p>');
+
+				$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'" placeholder="Comments..."></textarea><input type="submit" class="subComment btn btn-default" data-id="'+ data[x]._id +'" id="' + x + '" value="Submit"></p>');
+
+
+			}
+			
+
+		});
+
+
+	}
+
+	function getComments(objID, commentBoxId){
+
+		$.get('/showComments', {objID: objID}).done(function(data){
+
+			for(var i=1; i < data[0].comments.length; i++){
+
+				$('#article'+ commentBoxId + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[0].comments[i].name + "-" + data[0].comments[i].date + "</p><p class='userComment clearfix'>" + data[0].comments[i].comment + "<button class='btn btn-default' data-obj="+ objID+" id='"+commentBoxId + "-" + i + "'>Delete</button></p></div>");
+				}
+			
+		});
+
+		// $.ajax({
+		// 	type: 'GET',
+		// 	url: '/showComments',
+		// 	dataType: 'json', 
+		// 	data: {
+		// 		objID: objID
+		// 	}
+		// }).done(function(data){
+
+		// 	console.log("comments are ", data);
+		// 	console.log(data[0]);
+		// 	//console.log(""data[0].name);
+			
+		// });
+
+		// $.ajax({
+		// 	type: 'GET',
+		// 	url: '/showComments/' + objID
+		// 	/*dataType: 'json', 
+		// 	data: {
+		// 		objID: id
+		// 	}*/
+		// }).done(function(data){
+		// 	//getComments(data, commentBoxId);
+
+		// 	console.log("just data is ", data);
+		// 	console.log("data[x] is ", data[0]);
+
+		// 	for(var i=0; i < data[0].comments.length; i++){
+
+		// 		$('#article'+ commentBoxId + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[0].comments[i].name + " - " + data[0].comments[i].date + "</p><p class='userComment'>" + data[0].comments[i].comment + "<button id='delete" +commentBoxId + "'>Delete</button></div></p>");
+				
+		// 	}
+
+		// });			
+	}
+
+
+
+getNews();
+</script>
+</body>
+</html>
