@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>ScrapeIt</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
 	
@@ -18,6 +20,7 @@
 
 		body{
 			background-color: #702632;
+			font-size: 16px;
 		}
 
 		h1{
@@ -32,7 +35,8 @@
 		.headline{
 			font-weight: bold;
 			font-family: 'Tahoma';
-			color: #080705;
+			/*color: #080705;*/
+			color: #8c8c8c;
 		}
 
 		#link{
@@ -41,6 +45,7 @@
 		.blurb{
 			margin-bottom: 20px;
 			color: #000;
+			font-weight: 500;
 		}
 
 		a {
@@ -59,6 +64,9 @@
 			margin-bottom: 10px;
 			background-color: #40434E;
 			
+		}
+		.indivComm:last-child{
+			margin-bottom: 35px
 		}
 		.commHeader{
 			margin-top: 0px;
@@ -108,32 +116,38 @@
 			/*border: 1px solid #FFF;*/
 		}
 		.textAreaContainer{
-			/*margin: 5px 0 0 10%;*/
-			border: 1px solid #000;
-			/*width: 50%;*/
+			width: 15%;
 		}
 
 		input[type=submit]{
 			/*margin-left: 50px;*/
-			float: right;
-			margin-top: 50px;
-			margin-right: 30%;
+			/*float: right;*/
+			vertical-align: top;
+			margin-top: 43px;
+			margin-left: 15px;
 		}
 		button{
 			float: right;
 			margin-right: 25px;
 			margin-bottom: 10px;
 		}
+		.clearfix{
+			overflow: auto;
+		}
 	</style>
 </head>
 <body>
 
+<div class="container">
+
+<div class="col-sm-12">
 <h1>Associated Press News Outlet</h1>
 
 
 <div id="news"></div>
 
-
+</div>
+</div>
 <script type="text/javascript">
 
 	var commentBoxId;
@@ -248,7 +262,7 @@
 
 				$('#news').append('<p class="nameContainer"><input type="text" id="name' + x + '" placeholder="Name"></p>');
 
-				$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'" placeholder="Comments..."></textarea><input type="submit" class="subComment" data-id="'+ data[x]._id +'" id="' + x + '" value="submit"></p>');
+				$('#news').append('<p class="textAreaContainer"><textarea class="' + x +'" placeholder="Comments..."></textarea><input type="submit" class="subComment btn btn-default" data-id="'+ data[x]._id +'" id="' + x + '" value="Submit"></p>');
 
 
 			}
@@ -265,7 +279,7 @@
 
 			for(var i=1; i < data[0].comments.length; i++){
 
-				$('#article'+ commentBoxId + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[0].comments[i].name + "-" + data[0].comments[i].date + "</p><p class='userComment'>" + data[0].comments[i].comment + "<button data-obj="+ objID+" id='"+commentBoxId + "-" + i + "'>Delete</button></p></div>");
+				$('#article'+ commentBoxId + 'comments').append("<div class='indivComm'><p class='commHeader'>" + data[0].comments[i].name + "-" + data[0].comments[i].date + "</p><p class='userComment clearfix'>" + data[0].comments[i].comment + "<button class='btn btn-default' data-obj="+ objID+" id='"+commentBoxId + "-" + i + "'>Delete</button></p></div>");
 				}
 			
 		});
