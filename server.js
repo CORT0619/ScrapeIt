@@ -21,7 +21,9 @@ app.use(express.static('public'));
 
 //make connection to db and collection(s)
 	//var db = mongojs('scrapeit', ["scraped"]);
-var db = mongojs('mongodb://heroku_xwz9mmg1:hfh9fn7753olc67h9fopv5vfj8@ds145355.mlab.com:45355/heroku_xwz9mmg1');
+var uri  = 'mongodb://heroku_xwz9mmg1:hfh9fn7753olc67h9fopv5vfj8@ds145355.mlab.com:45355/heroku_xwz9mmg1';
+
+var db = mongojs(uri);
 db.on('error', function(error){
 
 	console.log("DB error: ", error);
